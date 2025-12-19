@@ -1,0 +1,88 @@
+@page "/"
+@using SafeBoda.Admin.Services
+@using System.Net.Http.Headers
+@inject ApiClient ApiClient
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Active Trips Dashboard</h1>
+        <button class="btn btn-outline-danger" @onclick="Logout">Logout</button>
+    </div>
+
+    @if (trips == null)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading active trips...</p>
+        </div>
+    }
+    else if (trips.Count == 0)
+    {
+        <div class="alert alert-info">No active trips found.</div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Trip ID</th>
+                            <th>Start (Lat/Long)</th>
+                            <th>End (Lat/Long)</th>
+                            <th>Price (RWF)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var trip in trips)
+                        {
+                            <tr>
+                                <td><code>@trip.Id.ToString().Substring(0, 8)...</code></td>
+                                <td>@trip.Start.Latitude.ToString("0.000"), @trip.Start.Longitude.ToString("0.000")</td>
+                                <td>@trip.End.Latitude.ToString("0.000"), @trip.End.Longitude.ToString("0.000")</td>
+                                <td class="fw-bold">@trip.Fare.ToString("N0")</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<TripDto>? trips;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(AuthService.AuthToken))
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        ApiClient.HttpClient.DefaultRequestHeaders.Authorization = 
+            new AuthenticationHeaderValue("Bearer", AuthService.AuthToken);
+
+        try
+        {
+            trips = await ApiClient.GetTripsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    private void Logout()
+    {
+        AuthService.Logout();
+        NavigationManager.NavigateTo("/login");
+    }
+}
