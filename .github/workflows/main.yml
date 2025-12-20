@@ -26,13 +26,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: cd SAFEBoda && dotnet restore
 
       - name: Build the project
-        run: dotnet build --configuration Release --no-restore
+        run: cd SAFEBoda && dotnet build --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test --verbosity normal
+        run: cd SAFEBoda && dotnet test --verbosity normal
 
   # Job 2: Build Docker image, push to Docker Hub, and deploy to Azure (only on push to main)
   build-push-and-deploy:
@@ -55,7 +55,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./SAFEBoda  # ? Changed from . to ./SAFEBoda
           push: true
           tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
           cache-from: type=gha
