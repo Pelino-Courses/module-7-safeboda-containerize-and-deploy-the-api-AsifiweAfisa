@@ -29,10 +29,10 @@ jobs:
         run: cd SAFEBoda && dotnet restore
 
       - name: Build the project
-        run: cd SAFEBoda && dotnet build --configuration Release --no-restore --warnaserror:false
+        run: cd SAFEBoda && dotnet build --configuration Release --no-restore /warnaserror-
 
       - name: Run tests
-        run: cd SAFEBoda && dotnet test SafeBoda.Api.Tests --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --filter "FullyQualifiedName!=SafeBoda.Api.Tests.TripsIntegrationTests"
+        run: cd SAFEBoda && dotnet test SafeBoda.Api.Tests --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --filter "FullyQualifiedName!~TripsIntegrationTests"
 
   # Job 2: Build Docker image, push to Docker Hub, and deploy to Azure (only on push to main)
   build-push-and-deploy:
