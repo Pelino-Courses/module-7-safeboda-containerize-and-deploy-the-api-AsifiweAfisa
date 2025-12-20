@@ -29,7 +29,7 @@ jobs:
         run: cd SAFEBoda && dotnet restore
 
       - name: Build the project
-        run: cd SAFEBoda && dotnet build --configuration Release --no-restore /warnaserror-
+        run: cd SAFEBoda && dotnet build --configuration Release --no-restore -p:TreatWarningsAsErrors=false
 
       - name: Run tests
         run: cd SAFEBoda && dotnet test SafeBoda.Api.Tests --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --filter "FullyQualifiedName!~TripsIntegrationTests"
