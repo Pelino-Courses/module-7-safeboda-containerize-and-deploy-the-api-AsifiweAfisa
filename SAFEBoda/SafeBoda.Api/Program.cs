@@ -29,8 +29,20 @@ builder.Services.AddCors(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("SafeBodaDb");
 
-builder.Services.AddDbContext<SafeBodaDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+if (string.IsNullOrEmpty(connectionString))
+{
+    // Use in-memory database for development/fallback (when no connection string is provided)
+    Console.WriteLine("Using In-Memory database (no connection string found)");
+    builder.Services.AddDbContext<SafeBodaDbContext>(options =>
+        options.UseInMemoryDatabase("SafeBodaInMemoryDb"));
+}
+else
+{
+    // Use MySQL database when connection string is available
+    Console.WriteLine($"Using MySQL database with connection string");
+    builder.Services.AddDbContext<SafeBodaDbContext>(options =>
+        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+}
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -118,9 +130,13 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    // Apply database migrations
     var dbContext = scope.ServiceProvider.GetRequiredService<SafeBodaDbContext>();
-    dbContext.Database.Migrate();
+    
+    // Only run migrations if we're using MySQL (not in-memory)
+    if (!string.IsNullOrEmpty(connectionString))
+    {
+        dbContext.Database.Migrate();
+    }
     
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     string[] roles = { "Rider", "Driver", "Admin" };

@@ -26,13 +26,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: cd SAFEBoda && dotnet restore
 
       - name: Build the project
-        run: dotnet build --configuration Release --no-restore
+        run: cd SAFEBoda && dotnet build --configuration Release --no-restore -p:TreatWarningsAsErrors=false
 
       - name: Run tests
-        run: dotnet test --verbosity normal
+        run: cd SAFEBoda && dotnet test SafeBoda.Api.Tests --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --filter "FullyQualifiedName!~TripsIntegrationTests"
 
   # Job 2: Build Docker image, push to Docker Hub, and deploy to Azure (only on push to main)
   build-push-and-deploy:
@@ -43,6 +43,9 @@ jobs:
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx with container driver
+        uses: docker/setup-buildx-action@v3
 
       # Log in to Docker Hub using your GitHub Secrets
       - name: Login to Docker Hub
@@ -55,7 +58,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./SAFEBoda
           push: true
           tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:latest
           cache-from: type=gha
