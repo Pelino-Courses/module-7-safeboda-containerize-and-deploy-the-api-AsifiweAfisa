@@ -2,21 +2,21 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy the solution file
-COPY ["SafeBoda.sln", "."]
-# Copy ALL project files (all 6 projects from the solution)
-COPY ["SafeBoda.Api/SafeBoda.Api.csproj", "SafeBoda.Api/"]
-COPY ["SafeBoda.Application/SafeBoda.Application.csproj", "SafeBoda.Application/"]
-COPY ["SafeBoda.Core/SafeBoda.Core.csproj", "SafeBoda.Core/"]
-COPY ["SafeBoda.Infrastructure/SafeBoda.Infrastructure.csproj", "SafeBoda.Infrastructure/"]
-COPY ["SafeBoda.Admin/SafeBoda.Admin.csproj", "SafeBoda.Admin/"]
-COPY ["SafeBoda.Api.Tests/SafeBoda.Api.Tests.csproj", "SafeBoda.Api.Tests/"]
+# Copy the solution file (it's one level up from Dockerfile location)
+COPY ["../SafeBoda.sln", "."]
+# Copy project files (they're in sibling directories)
+COPY ["../SafeBoda.Api/SafeBoda.Api.csproj", "SafeBoda.Api/"]
+COPY ["../SafeBoda.Application/SafeBoda.Application.csproj", "SafeBoda.Application/"]
+COPY ["../SafeBoda.Core/SafeBoda.Core.csproj", "SafeBoda.Core/"]
+COPY ["../SafeBoda.Infrastructure/SafeBoda.Infrastructure.csproj", "SafeBoda.Infrastructure/"]
+COPY ["../SafeBoda.Admin/SafeBoda.Admin.csproj", "SafeBoda.Admin/"]
+COPY ["../SafeBoda.Api.Tests/SafeBoda.Api.Tests.csproj", "SafeBoda.Api.Tests/"]
 
 # Restore dependencies for the entire solution
 RUN dotnet restore "SafeBoda.sln"
 
 # Copy everything else
-COPY . .
+COPY .. .
 
 # Build and publish ONLY the API project
 WORKDIR "/src/SafeBoda.Api"
