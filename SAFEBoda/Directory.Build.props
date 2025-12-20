@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!-- Disable treating nullable warnings as errors for build -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+</Project>
