@@ -29,10 +29,10 @@ jobs:
         run: cd SAFEBoda && dotnet restore
 
       - name: Build the project
-        run: cd SAFEBoda && dotnet build --configuration Release --no-restore
+        run: cd SAFEBoda && dotnet build --configuration Release --no-restore --warnaserror:false
 
       - name: Run tests
-        run: cd SAFEBoda && dotnet test SafeBoda.Api.Tests --verbosity normal --logger "trx;LogFileName=test-results.trx"
+        run: cd SAFEBoda && dotnet test SafeBoda.Api.Tests --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
   # Job 2: Build Docker image, push to Docker Hub, and deploy to Azure (only on push to main)
   build-push-and-deploy:
