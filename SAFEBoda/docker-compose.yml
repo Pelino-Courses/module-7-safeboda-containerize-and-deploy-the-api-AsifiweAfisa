@@ -1,0 +1,76 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: safeboda-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Alexis1!
+      MYSQL_DATABASE: SafeBodaDb
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - safeboda-network
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 30s
+
+  api:
+    build:
+      context: .
+      dockerfile: SafeBoda.Api/Dockerfile
+    container_name: safeboda-api
+    restart: unless-stopped
+    ports:
+      - "8080:80"  # HTTP only - removed HTTPS port
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80  # HTTP only - removed HTTPS
+      ConnectionStrings__SafeBodaDb: "Server=mysql;Port=3306;Database=SafeBodaDb;User=root;Password=Alexis1!;SslMode=None;"
+      JWT__ValidIssuer: "SafeBoda"
+      JWT__ValidAudience: "SafeBodaUsers"
+      JWT__Secret: "ThisIsASecureSecretKeyOfAtLeast32Chars!"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - safeboda-network
+    # Removed volumes for certificates
+    # Removed healthcheck temporarily to avoid issues
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Add phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: safeboda-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    ports:
+      - "8081:80"
+    networks:
+      - safeboda-network
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  safeboda-network:
+    driver: bridge
+    name: safeboda-network

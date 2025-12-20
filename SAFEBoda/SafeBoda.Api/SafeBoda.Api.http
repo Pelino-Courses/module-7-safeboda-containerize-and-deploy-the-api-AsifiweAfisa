@@ -1,0 +1,25 @@
+
+@SafeBoda.Api_HostAddress = http://localhost:5000
+
+POST http://localhost:5000/api/trips/request
+Accept: application/json
+Content-Type: application/json
+
+{
+"riderId":"658da236-19cd-437f-92ca-40901bdd023d",
+"start": {
+      "latitude": -1.9441,
+      "longitude": 30.0619
+    },
+    "end": {
+      "latitude": -1.95,
+      "longitude": 30.0891
+    }
+  }
+
+###
+
+GET http://localhost:5000/api/trips
+Accept: application/json
+
+###
